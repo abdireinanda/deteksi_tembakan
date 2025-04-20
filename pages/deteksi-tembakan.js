@@ -48,7 +48,7 @@ export default function DeteksiTembakan() {
         recognizerRef.current.stopListening();
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadModel = async () => {
     // Jika sedang memuat, jangan coba memuat lagi
@@ -224,12 +224,26 @@ export default function DeteksiTembakan() {
         <title>Deteksi Tembakan - Sistem Pendeteksi Suara</title>
         <meta name="description" content="Aplikasi deteksi tembakan dan suara lainnya menggunakan AI" />
         <link rel="icon" href="/favicon.ico" />
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+        <style jsx global>{`
           body {
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(30, 136, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+          }
+          @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
           }
         `}</style>
       </Head>
@@ -326,12 +340,6 @@ export default function DeteksiTembakan() {
                   animation: 'spin 1s linear infinite',
                   marginBottom: '1rem'
                 }}></div>
-                <style jsx>{`
-                  @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                  }
-                `}</style>
                 <p>Memuat model AI... Harap tunggu</p>
               </div>
             ) : (
@@ -499,13 +507,6 @@ export default function DeteksiTembakan() {
             boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
             animation: 'pulse 1.5s infinite'
           }}>
-            <style jsx>{`
-              @keyframes pulse {
-                0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7); }
-                70% { box-shadow: 0 0 0 10px rgba(30, 136, 229, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
-              }
-            `}</style>
             <div style={{ 
               display: 'flex',
               alignItems: 'center',
@@ -519,13 +520,6 @@ export default function DeteksiTembakan() {
                 marginRight: '12px',
                 animation: 'blink 1s infinite'
               }}></div>
-              <style jsx>{`
-                @keyframes blink {
-                  0% { opacity: 1; }
-                  50% { opacity: 0.4; }
-                  100% { opacity: 1; }
-                }
-              `}</style>
               <span style={{ fontWeight: 'bold' }}>Mendengarkan...</span> 
               <span style={{ marginLeft: '8px' }}>
                 Sistem aktif mendeteksi suara
