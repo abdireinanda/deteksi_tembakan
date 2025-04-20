@@ -26,8 +26,8 @@ export default function DeteksiTembakan() {
 
     const loadScripts = async () => {
       try {
-        await addScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.15.0/dist/tf.min.js');
-        await addScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.5.4/dist/speech-commands.min.js');
+        await addScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js');
+        await addScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js');
         // Tunggu sedikit untuk memastikan script sudah dimuat dengan sempurna
         setTimeout(() => {
           loadModel();
@@ -45,7 +45,11 @@ export default function DeteksiTembakan() {
     // Cleanup on component unmount
     return () => {
       if (recognizerRef.current) {
-        recognizerRef.current.stopListening();
+        try {
+          recognizerRef.current.stopListening();
+        } catch (e) {
+          console.log('Error stopping recognition:', e);
+        }
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -62,9 +66,14 @@ export default function DeteksiTembakan() {
       }
 
       // Bersihkan memori jika tensorflow sudah dimuat
-      if (window.tf) {
-        window.tf.engine().purgeUnusedTensors();
-        console.log('Cleaned up TensorFlow memory');
+      try {
+        if (window.tf) {
+          // Metode yang lebih aman untuk membersihkan memori TF
+          console.log('Cleaning up TensorFlow memory');
+          window.tf.dispose && window.tf.dispose();
+        }
+      } catch (memErr) {
+        console.log('Memory cleanup warning (non-critical):', memErr);
       }
       
       // Hentikan recognizer sebelumnya jika ada
