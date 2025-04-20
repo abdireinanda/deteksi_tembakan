@@ -27,7 +27,10 @@ export default function DeteksiTembakan() {
       try {
         await addScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js');
         await addScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js');
-        await loadModel();
+        // Tunggu sedikit untuk memastikan script sudah dimuat dengan sempurna
+        setTimeout(() => {
+          loadModel();
+        }, 1000);
       } catch (err) {
         setError(`Error loading scripts: ${err.message}`);
         console.error('Error loading scripts:', err);
@@ -49,13 +52,18 @@ export default function DeteksiTembakan() {
   const loadModel = async () => {
     try {
       if (!window.speechCommands) {
-        setError('Speech commands library not loaded yet. Please wait...');
+        setError('Speech commands library not loaded yet. Please wait or try refreshing the page.');
         return;
       }
 
-      const URL = '/my_model/';
-      const checkpointURL = URL + 'model.json';
-      const metadataURL = URL + 'metadata.json';
+      // Gunakan window.location.origin untuk mendapatkan URL dasar
+      const baseURL = window.location.origin;
+      const URL = `${baseURL}/my_model/`;
+      const checkpointURL = `${URL}model.json`;
+      const metadataURL = `${URL}metadata.json`;
+
+      console.log('Loading model from:', checkpointURL);
+      console.log('Loading metadata from:', metadataURL);
 
       const recognizer = window.speechCommands.create(
         'BROWSER_FFT',
@@ -64,31 +72,46 @@ export default function DeteksiTembakan() {
         metadataURL
       );
 
-      await recognizer.ensureModelLoaded();
+      // Tambahkan log untuk debugging
+      console.log('Recognizer created, loading model...');
+      
+      try {
+        await recognizer.ensureModelLoaded();
+        console.log('Model loaded successfully!');
+      } catch (modelError) {
+        console.error('Error loading model:', modelError);
+        setError(`Error loading model: ${modelError.message}`);
+        return;
+      }
       
       recognizerRef.current = recognizer;
-      labelsRef.current = recognizer.wordLabels();
       
-      // Initialize predictions array with labels
-      const initialPredictions = recognizer.wordLabels().map(label => ({
-        label,
-        probability: 0
-      }));
-      
-      setPredictions(initialPredictions);
-      setIsModelLoaded(true);
-      
-      console.log('Model loaded successfully');
-      console.log('Available labels:', recognizer.wordLabels());
+      try {
+        const labels = recognizer.wordLabels();
+        console.log('Available labels:', labels);
+        labelsRef.current = labels;
+        
+        // Initialize predictions array with labels
+        const initialPredictions = labels.map(label => ({
+          label,
+          probability: 0
+        }));
+        
+        setPredictions(initialPredictions);
+        setIsModelLoaded(true);
+      } catch (labelsError) {
+        console.error('Error getting labels:', labelsError);
+        setError(`Error getting labels: ${labelsError.message}`);
+      }
     } catch (err) {
-      setError(`Error loading model: ${err.message}`);
-      console.error('Error loading model:', err);
+      console.error('General error in loadModel:', err);
+      setError(`Error in model setup: ${err.message}`);
     }
   };
 
   const startListening = async () => {
     if (!recognizerRef.current) {
-      setError('Model not loaded yet.');
+      setError('Model not loaded yet. Please wait or refresh the page.');
       return;
     }
 
@@ -174,7 +197,7 @@ export default function DeteksiTembakan() {
             {isModelLoaded ? (
               <p style={{ color: 'green' }}>✓ Model berhasil dimuat</p>
             ) : (
-              <p>Memuat model...</p>
+              <p>Memuat model... (Harap tunggu)</p>
             )}
           </div>
 
@@ -297,6 +320,23 @@ export default function DeteksiTembakan() {
             <li><strong>Tanpa suara</strong>: Tidak ada suara terdeteksi</li>
             <li><strong>Tembakan</strong>: Suara tembakan</li>
           </ul>
+        </div>
+        
+        <div style={{
+          marginTop: '2rem',
+          padding: '1rem',
+          backgroundColor: '#fff8e1',
+          borderRadius: '0.5rem',
+          width: '100%',
+          maxWidth: '600px',
+        }}>
+          <h3>Tips Penggunaan:</h3>
+          <ol style={{ paddingLeft: '1.5rem' }}>
+            <li>Pastikan izinkan akses mikrofon saat browser memintanya</li>
+            <li>Untuk hasil terbaik, gunakan di lingkungan dengan sedikit bising</li>
+            <li>Jika deteksi tidak berfungsi, coba refresh halaman</li>
+            <li>Aplikasi ini paling baik digunakan dengan browser Chrome atau Firefox</li>
+          </ol>
         </div>
       </main>
     </div>
