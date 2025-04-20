@@ -37,7 +37,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Kelompok 5 : Muhammad Abdi Reinanda, Brandon Josua Christian, Julian Yang, Hezel Anthonie Norman Piter Papia, Okhama Siladata Devisepte{' '}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
